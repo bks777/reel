@@ -1,0 +1,33 @@
+{
+  "name": "reel",
+  "version": "1.0.0",
+  "description": "Test reel solution",
+  "main": "build/bundle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bks777/reel.git"
+  },
+  "keywords": [
+    "video-slot",
+    "reel",
+    "pixijs"
+  ],
+  "author": "Kostiantyn Bokov <kastianchiik@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bks777/reel/issues"
+  },
+  "homepage": "https://github.com/bks777/reel#readme",
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-core": "^6.11.4",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.9.0",
+    "pixi.js": "^4.0.0",
+    "webpack": "^1.13.1",
+    "write-file-webpack-plugin": "^3.1.8"
+  }
+}
