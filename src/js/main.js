@@ -1,8 +1,8 @@
-console.info('init');
 import Loader from './core/Loader';
+import SlotMachine from './reel/SlotMachine';
 
-let reel,
-    promise = Loader.httpGet({url:'./res/config.json'})
-        .then((config)=>{
-            // reel = new App(JSON.parse(config));
-        });
+let sm;
+Loader.httpGet({url:'./res/config.json'})
+.then((config)=>{
+    sm = new SlotMachine(JSON.parse(config));
+});

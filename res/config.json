@@ -1,13 +1,27 @@
 {
-  "width": 400,
+  "width": 800,
   "height": 600,
-  "parent": "window.document.body",
-  "images": {
-    "animationImages": [
-      {
-        "imageName": "",
-        "imageSrc": ""
-      }
-    ]
-  }
+  "parent": "container",
+  "images": [
+    {
+      "name": "el_1",
+      "path": "./res/el_1.png"
+    },
+    {
+      "name": "el_2",
+      "path": "./res/el_2.png"
+    },
+    {
+      "name": "el_3",
+      "path": "./res/el_3.png"
+    },
+    {
+      "name": "el_4",
+      "path": "./res/el_4.png"
+    },
+    {
+      "name": "el_5",
+      "path": "./res/el_5.png"
+    }
+  ]
 }
