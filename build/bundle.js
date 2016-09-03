@@ -264,6 +264,9 @@
 	            this.stage = stage;
 	            this.ticker = ticker;
 	            PIXI.customTicker = ticker;
+
+	            window.startReels = this.startReels.bind(this);
+	            window.stopReels = this.stopReels.bind(this);
 	        }
 
 	        /**
@@ -333,6 +336,12 @@
 	            }
 	            this.stage.addChild(this._rootContainer);
 	        }
+
+	        /**
+	         * Add single reel container to the slotMachine container
+	         * @param conf
+	         */
+
 	    }, {
 	        key: 'addReel',
 	        value: function addReel(conf) {
@@ -355,6 +364,100 @@
 
 	            this._rootContainer.addChild(reel);
 	            this.reels.push(reel);
+	        }
+
+	        /**
+	         * Stops slotMachine animations
+	         * @returns {Promise}
+	         */
+
+	    }, {
+	        key: 'stopReels',
+	        value: function stopReels() {
+	            var _this2 = this;
+
+	            var values = this.randomValues;
+	            return new Promise(function (resolve, reject) {
+	                _this2._delayBetweenReelsStop = _config2.default.delayBetweenReelsStop !== undefined ? _config2.default.delayBetweenReelsStop : 0;
+
+	                /* stop with delay */
+	                _this2.state = SlotMachine.STATE_STOPPING;
+	                var i = 0,
+	                    reelsStopped = 0,
+	                    stopThreadCallback = function stopThreadCallback() {
+	                    var callback = arguments.length <= 0 || arguments[0] === undefined ? stopThreadCallback : arguments[0];
+
+	                    if (i > _this2.reels.length - 1) {
+	                        return;
+	                    }
+
+	                    _this2.reels[i].stop(values[i]).then(function () {
+	                        reelsStopped++;
+
+	                        if (reelsStopped === _this2.reels.length) {
+	                            _this2.state = SlotMachine.STATE_STOP;
+	                            resolve();
+	                        }
+	                    }).catch(function (rejection) {
+	                        reject(rejection);
+	                    });
+
+	                    i++;
+	                    if (callback) {
+	                        setTimeout(callback, _this2._delayBetweenReelsStop);
+	                    }
+	                };
+
+	                setTimeout(stopThreadCallback, _this2._delayBetweenReelsStop);
+	            });
+	        }
+
+	        /**
+	         * Starting of slot machine animations. Yay!
+	         */
+
+	    }, {
+	        key: 'startReels',
+	        value: function startReels() {
+	            var _this3 = this;
+
+	            if (this.state === SlotMachine.STATE_STOP) {
+	                this.ticker.addOnce(function () {
+	                    /* momentum start */
+	                    _this3.state = SlotMachine.STATE_STARTING;
+	                    for (var i = 0; i < _this3.reels.length; i++) {
+	                        _this3.reels[i].start();
+	                    }
+	                    _this3.state = SlotMachine.STATE_RUN;
+	                }, this);
+	            }
+	        }
+
+	        // setSymbol (reel, row, symbol, symbolType) {
+	        //     this.reels[reel].setSymbol (row, symbol, symbolType);
+	        // }
+	        //
+	        // setSymbolType (reel, row, symbolType) {
+	        //     this.reels[reel].setSymbolType (row, symbolType);
+	        // }
+	        //
+	        // setSymbols (symbols) {
+	        //     for (let i = 0; i < symbols.length; i++) {
+	        //         for (let j = 0; j < symbols[i].length; j++) {
+	        //             this.reels[i].setSymbol (j+1, symbols[i][j]);
+	        //         }
+	        //     }
+	        // }
+
+	    }, {
+	        key: 'isRunning',
+	        value: function isRunning() {
+	            return this.state !== SlotMachine.STATE_STOP;
+	        }
+	    }, {
+	        key: 'randomValues',
+	        get: function get() {
+	            return null;
 	        }
 	    }]);
 
@@ -490,6 +593,8 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -498,11 +603,25 @@
 
 	var PIXI = window.PIXI;
 
+
+	/**
+	 * Object clone
+	 * @param object
+	 * @returns {*}
+	 */
+	function getClone(object) {
+	    return JSON.parse(JSON.stringify(object));
+	}
+
 	var Reel = function (_PIXI$Container) {
 	    _inherits(Reel, _PIXI$Container);
 
 	    _createClass(Reel, null, [{
 	        key: 'STATE_STOP',
+
+	        /**
+	         * Reel inner states getters
+	         */
 	        get: function get() {
 	            return 1;
 	        }
@@ -536,6 +655,13 @@
 	        get: function get() {
 	            return 7;
 	        }
+
+	        /**
+	         * Init of a reel
+	         * @param config
+	         * @constructor
+	         */
+
 	    }]);
 
 	    function Reel(config) {
@@ -554,6 +680,12 @@
 	        return _this;
 	    }
 
+	    /**
+	     * creating and setting of symbols,
+	     * adding to the PIXI render
+	     */
+
+
 	    _createClass(Reel, [{
 	        key: 'init',
 	        value: function init() {
@@ -569,8 +701,13 @@
 	                }
 	            }
 	            PIXI.customTicker.add(this.reelTick, this);
-	            // this.addEventListener("tick", this.reelTick.bind(this));
 	        }
+
+	        /**
+	         * For future extending of animations
+	         * @param animationType
+	         */
+
 	    }, {
 	        key: 'setAnimation',
 	        value: function setAnimation() {
@@ -584,12 +721,25 @@
 	                this.animationType = "standard";
 	            }
 	        }
+
+	        /**
+	         * Creates random symbol instance
+	         * @param type
+	         * @returns {*}
+	         */
+
 	    }, {
 	        key: 'createRandomElement',
 	        value: function createRandomElement(type) {
 	            var imgNum = this.getAllowedRandomSymbol();
 	            return this.createElement(imgNum, type);
 	        }
+
+	        /**
+	         * getting of available type for current reel
+	         * @returns {*}
+	         */
+
 	    }, {
 	        key: 'getAllowedRandomSymbol',
 	        value: function getAllowedRandomSymbol() {
@@ -611,6 +761,14 @@
 
 	            return imgNum;
 	        }
+
+	        /**
+	         * Creates PIXI Sprite element
+	         * @param num
+	         * @param type
+	         * @returns {Element}
+	         */
+
 	    }, {
 	        key: 'createElement',
 	        value: function createElement(num) {
@@ -626,34 +784,135 @@
 	                type = this.config.defaultTypeOfSymbol;
 	            }
 
-	            var el = new _Element2.default(num, type, this.config.symbols[num], this.config.symbolTypes, this.config.textures[this.config.symbols[num].name]);
+	            var el = new _Element2.default(num, type, this.config.symbols[num], this.config.textures[this.config.symbols[num].name]);
 
 	            el.width = this.config.width;
 	            el.height = this.config.rowHeight;
 
 	            return el;
 	        }
+
+	        /**
+	         * Render function
+	         * @param event
+	         */
+
 	    }, {
 	        key: 'reelTick',
 	        value: function reelTick(event) {
 	            this.mainLoop(event);
-
-	            if (this.state === Reel.STATE_RUN && this.needBlur) {
-
-	                for (var i = 0; i < this.elements.length; i++) {
-	                    this.elements[i].setSymbolType("blur");
-	                }
-
-	                this.needBlur = false;
+	            if (this.state === Reel.STATE_RUN) {
 	                this.needDefaultSymbols = true;
 	            }
 
 	            if (this.needDefaultSymbols && (this.state === Reel.STATE_NEED_FINISH || this.state === Reel.STATE_FINISHING || this.state === Reel.STATE_STOP)) {
-	                for (var _i = 0; _i < this.elements.length; _i++) {
-	                    this.elements[_i].setSymbolType("def");
+	                for (var i = 0; i < this.elements.length; i++) {
+	                    this.elements[i].setSymbolType("def");
 	                }
 	                this.needDefaultSymbols = false;
 	            }
+	        }
+
+	        /**
+	         * Creates element for further animating
+	         * @returns {*}
+	         */
+
+	    }, {
+	        key: 'nextElement',
+	        value: function nextElement() {
+	            var newEl = void 0,
+	                type = "def";
+
+	            if (this.state === Reel.STATE_STOPPING) {
+	                newEl = this.createElement(this.values[this.stoppedRows], type);
+	                this.stoppedRows++;
+	                if (this.stoppedRows > this.numChildren) {
+	                    this.state = Reel.STATE_NEED_FINISH;
+	                    this.stoppedRows = 0;
+	                }
+	            } else {
+	                newEl = this.createRandomElement(type);
+	            }
+
+	            return newEl;
+	        }
+
+	        /**
+	         * Stop logic for current reel
+	         * @param values
+	         * @returns {*}
+	         */
+
+	    }, {
+	        key: 'stop',
+	        value: function stop(values) {
+	            var _this2 = this;
+
+	            if (this.state === Reel.STATE_STARTING) {
+	                return new Promise(function (resolve, reject) {
+	                    setInterval(function () {
+	                        if (_this2.state !== Reel.STATE_STARTING) {
+	                            resolve();
+	                        }
+	                    }, 50);
+	                }).then(function () {
+	                    return _this2._stop(values);
+	                });
+	            } else {
+	                return this._stop(values);
+	            }
+	        }
+	    }, {
+	        key: '_stop',
+
+
+	        /**
+	         * Stop of current reel
+	         * @param values
+	         * @returns {Promise}
+	         * @private
+	         */
+	        value: function _stop(values) {
+	            var _this3 = this;
+
+	            return new Promise(function (resolve, reject) {
+	                var first = _this3.getAllowedRandomSymbol(),
+	                    last = _this3.getAllowedRandomSymbol();
+
+	                values = getClone(values);
+	                values = values.reverse();
+	                _this3.values = [first].concat(_toConsumableArray(values), [last]);
+	                _this3.state = Reel.STATE_STOPPING;
+
+	                var detectStopInterval = setInterval(function () {
+	                    if (_this3.state === Reel.STATE_STOP) {
+	                        clearInterval(detectStopInterval);
+	                        resolve();
+	                    }
+	                }, 50);
+	            });
+	        }
+
+	        /**
+	         * Change of state to start the animation
+	         */
+
+	    }, {
+	        key: 'start',
+	        value: function start() {
+	            this.state = Reel.STATE_NEED_START;
+	        }
+
+	        /**
+	         * getter for check of running
+	         * @returns {boolean}
+	         */
+
+	    }, {
+	        key: 'isRunning',
+	        value: function isRunning() {
+	            return this.state !== Reel.STATE_STOP;
 	        }
 	    }]);
 
@@ -685,15 +944,21 @@
 	var Element = function (_PIXI$Container) {
 	    _inherits(Element, _PIXI$Container);
 
-	    function Element(symbolNumber, symbolType, configOfSymbol, configOfSymbolTypes, texture) {
+	    /**
+	     * Init of single symbol
+	     * @param symbolNumber
+	     * @param symbolType
+	     * @param configOfSymbol
+	     * @param texture
+	     * @constructor
+	     */
+	    function Element(symbolNumber, symbolType, configOfSymbol, texture) {
 	        _classCallCheck(this, Element);
 
 	        var _this = _possibleConstructorReturn(this, (Element.__proto__ || Object.getPrototypeOf(Element)).call(this));
 
 	        _this.symbolNumber = symbolNumber;
-	        _this.symbolType = symbolType;
 	        _this.imageAlias = symbolType + "_" + symbolNumber;
-	        _this.configOfSymbolTypes = configOfSymbolTypes;
 	        _this.configOfSymbol = configOfSymbol;
 	        _this.texture = texture;
 
@@ -701,77 +966,51 @@
 	        return _this;
 	    }
 
+	    /**
+	     * adding of sprite to container
+	     * @private
+	     */
+
+
 	    _createClass(Element, [{
 	        key: "_addContent",
 	        value: function _addContent() {
 	            this.content = new PIXI.Sprite(this.texture);
-	            this.applyContentConfig();
 	            this.addChild(this.content);
-	            this.setContentToCenter();
 	        }
-	    }, {
-	        key: "applyContentConfig",
-	        value: function applyContentConfig() {}
-	    }, {
-	        key: "setContentToCenter",
-	        value: function setContentToCenter() {}
+
+	        /**
+	         * Changes texture
+	         * @param spriteSheet
+	         */
+
 	    }, {
 	        key: "setSpriteSheet",
-	        value: function setSpriteSheet(spriteSheet) {}
+	        value: function setSpriteSheet(spriteSheet) {
+	            this.content.texture = spriteSheet;
+	        }
+
+	        /**
+	         * Getter for the symbol name
+	         * @returns {*}
+	         */
+
 	    }, {
 	        key: "getSymbolName",
 	        value: function getSymbolName() {
 	            return this.configOfSymbol.name;
 	        }
+
+	        /**
+	         * Getter for the content
+	         * @returns {PIXI.Sprite}
+	         */
+
 	    }, {
 	        key: "getContent",
 	        value: function getContent() {
 	            return this.content;
 	        }
-	    }, {
-	        key: "setSymbol",
-	        value: function setSymbol(symbolNumber, configOfSymbol) {
-	            var symbolType = arguments.length <= 2 || arguments[2] === undefined ? "def" : arguments[2];
-
-	            if (symbolNumber !== undefined && symbolNumber !== this.symbolNumber) {
-	                this.imageAlias = symbolType + "_" + symbolNumber;
-	                this.symbolNumber = symbolNumber;
-	                this.configOfSymbol = configOfSymbol;
-	            }
-	            this.setSymbolType(symbolType);
-	        }
-	    }, {
-	        key: "setSymbolType",
-	        value: function setSymbolType(symbolType) {
-	            this.content.stop();
-
-	            this.symbolType = symbolType;
-	            this.imageAlias = symbolType + "_" + this.symbolNumber;
-	            this.content.gotoAndPlay(this.imageAlias);
-
-	            this.applyContentConfig();
-
-	            this.setContentToCenter();
-	        }
-
-	        // set _width(width) {
-	        //     this.width = width;
-	        //     this.setContentToCenter();
-	        // }
-	        //
-	        // get _width () {
-	        //     return this.width;
-	        // }
-	        //
-	        // set _height(height) {
-	        //     this.height = height;
-	        //     this.setContentToCenter();
-	        // }
-	        //
-	        // get _height () {
-	        //     return this.height;
-	        // }
-
 	    }]);
 
 	    return Element;
@@ -799,22 +1038,33 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	/**
+	 * TimelineLite animation
+	 * @param target symbol
+	 * @param size delta for Y
+	 * @param time for move in milliseconds
+	 * @returns {Promise}
+	 */
 	function parabolaAnimation(target) {
 	    var size = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 	    var time = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
-
 	    return new Promise(function (resolve, reject) {
-	        createjs.Tween.get(target, { override: true }).to({ y: size }, time).to({ y: 0 }, time).call(resolve);
+	        new TimelineLite().to(target, time / 1000, { y: size }).to(target, time / 1000, { y: 0, onComplete: resolve });
 
 	        setTimeout(reject, time + 500);
 	    });
 	}
 
+	/**
+	 * Getter for the most bottom element on the reelArea
+	 * @param reel
+	 * @returns {PIXI.DisplayObject}
+	 */
 	function findBottomElement(reel) {
 	    var el = reel.getChildAt(0);
 
-	    for (var i = 1; i < reel.numChildren; i++) {
+	    for (var i = 1; i < reel.children.length; i++) {
 	        if (el.y < reel.getChildAt(i).y) {
 	            el = reel.getChildAt(i);
 	        }
@@ -830,7 +1080,11 @@
 
 	    _createClass(Animations, null, [{
 	        key: "standard",
-	        value: function standard(event) {
+
+	        /**
+	         * Standard linear animation to bottom
+	         */
+	        value: function standard() {
 	            var _this = this;
 
 	            var maxY = this.config.height + this.config.rowHeight,
@@ -856,31 +1110,26 @@
 	            }
 
 	            if (this.state === _Reel2.default.STATE_RUN || this.state === _Reel2.default.STATE_STOPPING) {
-	                var lastEl = findBottomElement(this);
-
-	                if (lastEl.y + velocity >= maxY) {
-	                    this.elements.splice(this.elements.length - 1, 1);
-	                    this.removeChild(lastEl);
-
-	                    var newEl = this.nextElement(); //!* if this is the last element than state will change to STATE_NEED_FINISH *!/
-	                    newEl.x = 0;
-	                    newEl.y = lastEl.y - maxY + startPosition;
-	                    this.elements.splice(0, 0, newEl);
-	                    this.addChildAt(newEl, 0);
-	                }
-
-	                if (this.state === _Reel2.default.STATE_NEED_FINISH) {
-	                    velocity = maxY - lastEl.y;
-	                }
-
-	                for (var i = 0; i < this.numChildren; i++) {
-	                    this.getChildAt(i).y += velocity;
-	                }
-
 	                setTimeout(function () {
-	                    var pt = _this.localToGlobal(0, 0);
-	                    _this.stage.requestUpdate(new createjs.Rectangle(pt.x, pt.y, _this.config.width, _this.config.height));
-	                    //this.stage.requestUpdate();
+	                    var lastEl = findBottomElement(_this);
+	                    if (lastEl.y + velocity >= maxY) {
+	                        _this.elements.splice(_this.elements.length - 1, 1);
+	                        _this.removeChild(lastEl);
+
+	                        var newEl = _this.nextElement(); //!* if this is the last element than state will change to STATE_NEED_FINISH *!/
+	                        newEl.x = 0;
+	                        newEl.y = lastEl.y - maxY + startPosition;
+	                        _this.elements.splice(0, 0, newEl);
+	                        _this.addChildAt(newEl, 0);
+	                    }
+
+	                    if (_this.state === _Reel2.default.STATE_NEED_FINISH) {
+	                        velocity = maxY - lastEl.y;
+	                    }
+
+	                    for (var i = 0; i < _this.children.length; i++) {
+	                        _this.getChildAt(i).y += velocity;
+	                    }
 	                }, 0);
 	            }
 

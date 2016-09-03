@@ -1,78 +1,54 @@
 const PIXI = window.PIXI;
 
 export default class Element extends PIXI.Container{
-    constructor(symbolNumber, symbolType, configOfSymbol, configOfSymbolTypes, texture){
+    /**
+     * Init of single symbol
+     * @param symbolNumber
+     * @param symbolType
+     * @param configOfSymbol
+     * @param texture
+     * @constructor
+     */
+    constructor(symbolNumber, symbolType, configOfSymbol, texture){
         super();
         this.symbolNumber = symbolNumber;
-        this.symbolType = symbolType;
         this.imageAlias = symbolType+"_"+symbolNumber;
-        this.configOfSymbolTypes = configOfSymbolTypes;
         this.configOfSymbol = configOfSymbol;
         this.texture = texture;
 
         this._addContent();
     }
 
+    /**
+     * adding of sprite to container
+     * @private
+     */
     _addContent () {
         this.content = new PIXI.Sprite (this.texture);
-        this.applyContentConfig();
         this.addChild(this.content);
-        this.setContentToCenter();
     }
 
-    applyContentConfig () {
-
-    }
-
-    setContentToCenter () {
-    }
+    /**
+     * Changes texture
+     * @param spriteSheet
+     */
     setSpriteSheet (spriteSheet) {
-
+        this.content.texture = spriteSheet;
     }
+
+    /**
+     * Getter for the symbol name
+     * @returns {*}
+     */
     getSymbolName () {
         return this.configOfSymbol.name;
     }
 
+    /**
+     * Getter for the content
+     * @returns {PIXI.Sprite}
+     */
     getContent () {
         return this.content;
     }
-
-    setSymbol (symbolNumber, configOfSymbol, symbolType = "def") {
-        if (symbolNumber !== undefined && symbolNumber !== this.symbolNumber) {
-            this.imageAlias = `${symbolType}_${symbolNumber}`;
-            this.symbolNumber = symbolNumber;
-            this.configOfSymbol = configOfSymbol;
-        }
-        this.setSymbolType(symbolType);
-    }
-
-    setSymbolType (symbolType) {
-        this.content.stop();
-
-        this.symbolType = symbolType;
-        this.imageAlias = `${symbolType}_${this.symbolNumber}`;
-        this.content.gotoAndPlay(this.imageAlias);
-
-        this.applyContentConfig();
-
-        this.setContentToCenter();
-    }
-
-    // set _width(width) {
-    //     this.width = width;
-    //     this.setContentToCenter();
-    // }
-    //
-    // get _width () {
-    //     return this.width;
-    // }
-    //
-    // set _height(height) {
-    //     this.height = height;
-    //     this.setContentToCenter();
-    // }
-    //
-    // get _height () {
-    //     return this.height;
-    // }
 }

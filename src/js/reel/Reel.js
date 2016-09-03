@@ -2,7 +2,20 @@ const PIXI = window.PIXI;
 import Element from './Element';
 import Animations from './Animations';
 
+/**
+ * Object clone
+ * @param object
+ * @returns {*}
+ */
+function getClone(object)
+{
+    return JSON.parse(JSON.stringify(object));
+}
+
 export default class Reel extends PIXI.Container {
+    /**
+     * Reel inner states getters
+     */
     static get STATE_STOP () {      return 1;   }
     static get STATE_STARTING () {  return 2;   }
     static get STATE_RUN () {       return 3;   }
@@ -11,6 +24,11 @@ export default class Reel extends PIXI.Container {
     static get STATE_NEED_FINISH(){ return 6;   }
     static get STATE_NEED_START (){ return 7;   }
 
+    /**
+     * Init of a reel
+     * @param config
+     * @constructor
+     */
     constructor(config){
         super();
         this.config = config;
@@ -23,11 +41,15 @@ export default class Reel extends PIXI.Container {
         this.setAnimation (this.config.animation);
     }
 
+    /**
+     * creating and setting of symbols,
+     * adding to the PIXI render
+     */
     init () {
         for (var i = 0; i < this.config.numOfRows; i++) {
             var el = this.createRandomElement();
             el.x = 0;
-            el.y = (i-1)*(this.config.rowHeight + this.config.distanceBetweenRows);
+            el.y = (i - 1)*(this.config.rowHeight + this.config.distanceBetweenRows);
             this.addChild(el);
             this.elements.push(el);
 
@@ -36,9 +58,12 @@ export default class Reel extends PIXI.Container {
             }
         }
         PIXI.customTicker.add( this.reelTick, this);
-        // this.addEventListener("tick", this.reelTick.bind(this));
     }
 
+    /**
+     * For future extending of animations
+     * @param animationType
+     */
     setAnimation (animationType = "standard") {
         if (Animations[animationType] !== undefined) {
             this.mainLoop = Animations[animationType].bind(this);
@@ -49,11 +74,20 @@ export default class Reel extends PIXI.Container {
         }
     }
 
+    /**
+     * Creates random symbol instance
+     * @param type
+     * @returns {*}
+     */
     createRandomElement (type) {
         let imgNum = this.getAllowedRandomSymbol();
         return this.createElement (imgNum, type);
     }
 
+    /**
+     * getting of available type for current reel
+     * @returns {*}
+     */
     getAllowedRandomSymbol () {
         let imgNum,
             allowedSymbols = [],
@@ -74,6 +108,12 @@ export default class Reel extends PIXI.Container {
         return imgNum;
     }
 
+    /**
+     * Creates PIXI Sprite element
+     * @param num
+     * @param type
+     * @returns {Element}
+     */
     createElement (num, type = this.config.defaultTypeOfSymbol) {
         if (this.config.symbols[num] === undefined) {
             console.error (`There is no symbol=${num}. Using symbol = 1`);
@@ -89,7 +129,6 @@ export default class Reel extends PIXI.Container {
             num,
             type,
             this.config.symbols[num],
-            this.config.symbolTypes,
             this.config.textures[this.config.symbols[num].name]
         );
 
@@ -99,16 +138,13 @@ export default class Reel extends PIXI.Container {
         return el;
     }
 
+    /**
+     * Render function
+     * @param event
+     */
     reelTick (event) {
         this.mainLoop (event);
-
-        if (this.state === Reel.STATE_RUN && this.needBlur) {
-
-            for (let i = 0; i < this.elements.length; i++) {
-                this.elements[i].setSymbolType("blur");
-            }
-
-            this.needBlur = false;
+        if (this.state === Reel.STATE_RUN ) {
             this.needDefaultSymbols = true;
         }
 
@@ -123,5 +159,89 @@ export default class Reel extends PIXI.Container {
             }
             this.needDefaultSymbols = false;
         }
+    }
+
+    /**
+     * Creates element for further animating
+     * @returns {*}
+     */
+    nextElement () {
+        let newEl,
+            type = "def";
+
+        if (this.state === Reel.STATE_STOPPING) {
+            newEl = this.createElement(this.values[this.stoppedRows], type);
+            this.stoppedRows++;
+            if (this.stoppedRows > this.numChildren) {
+                this.state = Reel.STATE_NEED_FINISH;
+                this.stoppedRows = 0;
+            }
+        } else {
+            newEl = this.createRandomElement(type);
+        }
+
+        return newEl;
+    }
+
+    /**
+     * Stop logic for current reel
+     * @param values
+     * @returns {*}
+     */
+    stop (values) {
+        if (this.state === Reel.STATE_STARTING) {
+            return new Promise ((resolve, reject) => {
+                setInterval (() => {
+                    if (this.state !== Reel.STATE_STARTING) {
+                        resolve();
+                    }
+                },50);
+            }).then (() => {
+                return this._stop(values);
+            });
+
+        } else {
+            return this._stop(values);
+        }
+    };
+
+    /**
+     * Stop of current reel
+     * @param values
+     * @returns {Promise}
+     * @private
+     */
+    _stop (values) {
+        return new Promise ((resolve, reject) => {
+            let first = this.getAllowedRandomSymbol(),
+                last = this.getAllowedRandomSymbol();
+
+            values = getClone(values);
+            values = values.reverse();
+            this.values = [first, ...values, last];
+            this.state = Reel.STATE_STOPPING;
+
+            let detectStopInterval = setInterval(() => {
+                if (this.state === Reel.STATE_STOP) {
+                    clearInterval(detectStopInterval);
+                    resolve();
+                }
+            }, 50);
+        });
+    }
+
+    /**
+     * Change of state to start the animation
+     */
+    start () {
+        this.state = Reel.STATE_NEED_START;
+    }
+
+    /**
+     * getter for check of running
+     * @returns {boolean}
+     */
+    isRunning () {
+        return this.state !== Reel.STATE_STOP;
     }
 }

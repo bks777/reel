@@ -75,6 +75,9 @@ export default class SlotMachine {
         this.stage = stage;
         this.ticker = ticker;
         PIXI.customTicker = ticker;
+
+        window.startReels = this.startReels.bind(this);
+        window.stopReels = this.stopReels.bind(this);
     }
 
     /**
@@ -136,6 +139,10 @@ export default class SlotMachine {
         this.stage.addChild(this._rootContainer);
     }
 
+    /**
+     * Add single reel container to the slotMachine container
+     * @param conf
+     */
     addReel(conf) {
         let reelConfig = Object.assign({}, config.defaultReel, conf),
             reel = new Reel(reelConfig),
@@ -156,5 +163,87 @@ export default class SlotMachine {
 
         this._rootContainer.addChild(reel);
         this.reels.push(reel);
+    }
+
+    /**
+     * Stops slotMachine animations
+     * @returns {Promise}
+     */
+    stopReels () {
+        let values = this.randomValues;
+        return new Promise ( (resolve, reject) => {
+            this._delayBetweenReelsStop = (config.delayBetweenReelsStop !== undefined ? config.delayBetweenReelsStop : 0);
+
+            /* stop with delay */
+            this.state = SlotMachine.STATE_STOPPING;
+            let i = 0,
+                reelsStopped = 0,
+                stopThreadCallback = (callback = stopThreadCallback)=>{
+                if (i > this.reels.length-1){
+                    return;
+                }
+
+                this.reels[i].stop(values[i])
+                    .then (() => {
+                        reelsStopped++;
+
+                        if (reelsStopped === this.reels.length) {
+                            this.state = SlotMachine.STATE_STOP;
+                            resolve();
+                        }
+                    })
+                    .catch((rejection) => {
+                        reject(rejection);
+                    });
+
+                i++;
+                if (callback){
+                    setTimeout(callback, this._delayBetweenReelsStop);
+                }
+            };
+
+            setTimeout(stopThreadCallback, this._delayBetweenReelsStop );
+        });
+
+    }
+
+    /**
+     * Starting of slot machine animations. Yay!
+     */
+    startReels() {
+        if (this.state === SlotMachine.STATE_STOP) {
+            this.ticker.addOnce(()=>{
+                /* momentum start */
+                this.state = SlotMachine.STATE_STARTING;
+                for (let i = 0; i < this.reels.length; i++) {
+                    this.reels[i].start();
+                }
+                this.state = SlotMachine.STATE_RUN;
+            }, this);
+        }
+    }
+
+    // setSymbol (reel, row, symbol, symbolType) {
+    //     this.reels[reel].setSymbol (row, symbol, symbolType);
+    // }
+    //
+    // setSymbolType (reel, row, symbolType) {
+    //     this.reels[reel].setSymbolType (row, symbolType);
+    // }
+    //
+    // setSymbols (symbols) {
+    //     for (let i = 0; i < symbols.length; i++) {
+    //         for (let j = 0; j < symbols[i].length; j++) {
+    //             this.reels[i].setSymbol (j+1, symbols[i][j]);
+    //         }
+    //     }
+    // }
+
+    isRunning () {
+        return this.state !== SlotMachine.STATE_STOP;
+    }
+
+    get randomValues(){
+        return null;
     }
 }
