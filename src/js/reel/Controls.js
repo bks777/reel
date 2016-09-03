@@ -38,7 +38,7 @@ export default class Controls extends PIXI.Container{
 
         btnContainer.interactive = btnContainer.buttonMode = true;
         btnContainer.defaultCursor = 'pointer';
-        btnContainer.click = callback;
+        btnContainer.click = btnContainer.touchend = callback;
 
         btnContainer.position = new PIXI.Point(config.controls.startBtn.x, config.controls.startBtn.y)
 
@@ -71,7 +71,7 @@ export default class Controls extends PIXI.Container{
 
         btnContainer.interactive = btnContainer.buttonMode = true;
         btnContainer.defaultCursor = 'pointer';
-        btnContainer.click = callback;
+        btnContainer.click = btnContainer.touchend = callback;
 
         btnContainer.position = new PIXI.Point(config.controls.stopBtn.x, config.controls.stopBtn.y)
 
@@ -104,7 +104,7 @@ export default class Controls extends PIXI.Container{
 
         btnContainer.interactive = btnContainer.buttonMode = true;
         btnContainer.defaultCursor = 'pointer';
-        btnContainer.click = callback;
+        btnContainer.click = btnContainer.touchend = callback;
 
         btnContainer.position = new PIXI.Point(config.controls.aboutBtn.x, config.controls.aboutBtn.y)
 
