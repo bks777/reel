@@ -161,11 +161,26 @@
 
 	var _Reel2 = _interopRequireDefault(_Reel);
 
+	var _Controls = __webpack_require__(8);
+
+	var _Controls2 = _interopRequireDefault(_Controls);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var PIXI = window.PIXI;
+
+
+	/**
+	 * Creating of random number
+	 * @param min {Number} from
+	 * @param max {Number} to
+	 * @returns {*}
+	 */
+	function getRandomNumber(min, max) {
+	    return Math.floor(Math.random() * (max - min)) + min;
+	}
 
 	var SlotMachine = function () {
 	    _createClass(SlotMachine, null, [{
@@ -197,54 +212,94 @@
 	        get: function get() {
 	            return 5;
 	        }
-	    }, {
-	        key: 'STATE_FINISHING',
-	        get: function get() {
-	            return 6;
-	        }
-	    }, {
-	        key: 'STATE_NEED_FINISH',
-	        get: function get() {
-	            return 7;
-	        }
-	    }, {
-	        key: 'STATE_NEED_START',
-	        get: function get() {
-	            return 8;
-	        }
 
 	        /**
 	         * Constructor for reelSystem
-	         * @param config {Object} consists parsed JSON with images and init data
+	         * @param conf {Object} consists parsed JSON with images and init data
 	         * @constructor
 	         */
 
 	    }]);
 
-	    function SlotMachine(config) {
+	    function SlotMachine(conf) {
 	        var _this = this;
 
 	        _classCallCheck(this, SlotMachine);
 
 	        this.state = false;
 	        this._rootContainer = new PIXI.Container();
-	        this.initRenderer(config.parent, config.width, config.height);
-	        this.initTextures(config.images).then(function () {
+
+	        this.initRenderer(conf.parent, conf.width, conf.height);
+	        this.initTextures(conf.images).then(function () {
 	            _this.state = SlotMachine.STATE_DATA_LOADED;
 	        });
 	        this.startCounter = 0;
 	        this.initSlotMachine();
+
+	        this._rootContainer.x = _config2.default.left;
+	        this._rootContainer.y = _config2.default.top;
+	        this._rootContainer.width = _config2.default.width;
+	        this._rootContainer.height = _config2.default.height;
+	        this._setMask(_config2.default.width, _config2.default.height);
+	        this._fillStageBg(_config2.default.bgColor, conf.width, conf.height);
 	    }
 
 	    /**
-	     * Creates PIXI renderer and start frames ticker
-	     * @param parent {String} parent node id for a PIXI stage
-	     * @param width {Number} width of a stage
-	     * @param height {Number} height of a stage
+	     * Setting mask for main screen of reelSystem
+	     * Decoration for reels
+	     * @param width
+	     * @param height
+	     * @private
 	     */
 
 
 	    _createClass(SlotMachine, [{
+	        key: '_setMask',
+	        value: function _setMask(width, height) {
+	            var mask = new PIXI.Graphics(),
+	                rect = new PIXI.Graphics();
+	            mask.beginFill();
+	            mask.drawRoundedRect(_config2.default.left, _config2.default.top, width, height, _config2.default.cornerRaduis);
+	            mask.endFill();
+	            this.stage.addChild(mask);
+	            this._rootContainer.mask = mask;
+
+	            rect.beginFill(_config2.default.fillColor, _config2.default.fillAlpha);
+	            rect.drawRoundedRect(_config2.default.left, _config2.default.top, width, height, _config2.default.cornerRaduis);
+	            rect.endFill();
+
+	            this.stage.addChildAt(rect, 1);
+	        }
+
+	        /**
+	         * Adds back color
+	         * @param color
+	         * @param width
+	         * @param height
+	         * @private
+	         */
+
+	    }, {
+	        key: '_fillStageBg',
+	        value: function _fillStageBg(color) {
+	            var width = arguments.length <= 1 || arguments[1] === undefined ? 1280 : arguments[1];
+	            var height = arguments.length <= 2 || arguments[2] === undefined ? 720 : arguments[2];
+
+	            var bgFiller = new PIXI.Graphics();
+	            bgFiller.beginFill(color, 1);
+	            bgFiller.drawRect(0, 0, width, height);
+	            bgFiller.endFill();
+	            this.stage.addChildAt(new PIXI.Sprite(bgFiller.generateCanvasTexture()), 0);
+	        }
+
+	        /**
+	         * Creates PIXI renderer and start frames ticker
+	         * @param parent {String} parent node id for a PIXI stage
+	         * @param width {Number} width of a stage
+	         * @param height {Number} height of a stage
+	         */
+
+	    }, {
 	        key: 'initRenderer',
 	        value: function initRenderer() {
 	            var parent = arguments.length <= 0 || arguments[0] === undefined ? 'container' : arguments[0];
@@ -264,9 +319,6 @@
 	            this.stage = stage;
 	            this.ticker = ticker;
 	            PIXI.customTicker = ticker;
-
-	            window.startReels = this.startReels.bind(this);
-	            window.stopReels = this.stopReels.bind(this);
 	        }
 
 	        /**
@@ -317,10 +369,13 @@
 	                this.startCounter++;
 	                return;
 	            }
-	            console.info('!!! START !!!');
 	            this.startCounter = undefined;
 	            this.state = SlotMachine.STATE_STOP;
 	            this.initReels();
+	            this.controls = new _Controls2.default(this.startReels.bind(this), this.stopReels.bind(this), function () {
+	                console.info('K.Bokov production');
+	            });
+	            this.stage.addChild(this.controls);
 	        }
 
 	        /**
@@ -437,10 +492,28 @@
 	        value: function isRunning() {
 	            return this.state !== SlotMachine.STATE_STOP;
 	        }
+
+	        /**
+	         * Server imitation
+	         * @returns {Array}
+	         */
+
 	    }, {
 	        key: 'randomValues',
 	        get: function get() {
-	            return [[1, 3, 4], [2, 4, 3], [5, 1, 5], [2, 3, 1], [4, 4, 3]];
+	            var cols = 5,
+	                raws = 3,
+	                arr = [],
+	                innerArr = void 0;
+	            for (var col = 0; col < cols; col++) {
+	                innerArr = [];
+	                for (var raw = 0; raw < raws; raw++) {
+	                    innerArr.push(getRandomNumber(1, 5));
+	                }
+	                arr.push(innerArr);
+	            }
+
+	            return arr;
 	        }
 	    }]);
 
@@ -459,6 +532,10 @@
 	    value: true
 	});
 	var config = {
+	    bgColor: 0x40e0d0,
+	    fillColor: 0xfcfcfc,
+	    fillAlpha: .3,
+	    cornerRaduis: 20,
 	    left: 130,
 	    top: 113,
 	    width: 700,
@@ -550,6 +627,48 @@
 	            }
 	        },
 	        fps: 60
+	    },
+	    controls: {
+	        width: 700,
+	        height: 150,
+	        x: 300,
+	        y: 600,
+	        btn: {
+	            width: 100,
+	            height: 45,
+	            color: 0xfcfcfc,
+	            cornersRadius: 5
+	        },
+	        startBtn: {
+	            x: 10,
+	            y: 10,
+	            text: 'START!',
+	            textStyle: {
+	                font: 'bold 14px Arial',
+	                fill: '#00ff00',
+	                stroke: '#000000'
+	            }
+	        },
+	        stopBtn: {
+	            x: 120,
+	            y: 10,
+	            text: 'STOP!',
+	            textStyle: {
+	                font: 'bold 14px Arial',
+	                fill: '#ff0000',
+	                stroke: '#000000'
+	            }
+	        },
+	        aboutBtn: {
+	            x: 230,
+	            y: 10,
+	            text: 'Info',
+	            textStyle: {
+	                font: 'bold 20px Arial',
+	                fill: '#cccccc',
+	                stroke: '#000000'
+	            }
+	        }
 	    }
 	};
 	exports.default = config;
@@ -1130,6 +1249,131 @@
 	}();
 
 	exports.default = Animations;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _config = __webpack_require__(4);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var PIXI = window.PIXI;
+
+	var Controls = function (_PIXI$Container) {
+	    _inherits(Controls, _PIXI$Container);
+
+	    function Controls(startBtnCallback, stopBtnCallback, aboutBtnCallbak) {
+	        _classCallCheck(this, Controls);
+
+	        var _this = _possibleConstructorReturn(this, (Controls.__proto__ || Object.getPrototypeOf(Controls)).call(this));
+
+	        _this.width = _config2.default.controls.width;
+	        _this.height = _config2.default.controls.height;
+	        _this.position = new PIXI.Point(_config2.default.controls.x, _config2.default.controls.y);
+	        _this._addStartButton(startBtnCallback);
+	        _this._addStopButton(stopBtnCallback);
+	        _this._addAboutButton(aboutBtnCallbak);
+	        return _this;
+	    }
+
+	    _createClass(Controls, [{
+	        key: '_addStartButton',
+	        value: function _addStartButton(callback) {
+	            var btnContainer = new PIXI.Container(),
+	                btnTxt = new PIXI.Text(_config2.default.controls.startBtn.text, _config2.default.controls.startBtn.textStyle),
+	                btnBg = new PIXI.Graphics();
+	            btnBg.beginFill(_config2.default.controls.btn.color, 1);
+	            btnBg.drawRoundedRect(0, 0, _config2.default.controls.btn.width, _config2.default.controls.btn.height, _config2.default.controls.btn.cornersRadius);
+	            btnBg.endFill();
+	            btnBg = new PIXI.Sprite(btnBg.generateCanvasTexture());
+
+	            btnTxt.x = (_config2.default.controls.btn.width - btnTxt.width) / 2;
+	            btnTxt.y = (_config2.default.controls.btn.height - btnTxt.height) / 2;
+
+	            btnContainer.addChild(btnBg);
+	            btnContainer.addChild(btnTxt);
+
+	            btnContainer.interactive = btnContainer.buttonMode = true;
+	            btnContainer.defaultCursor = 'pointer';
+	            btnContainer.click = callback;
+
+	            btnContainer.position = new PIXI.Point(_config2.default.controls.startBtn.x, _config2.default.controls.startBtn.y);
+
+	            this.addChild(btnContainer);
+	        }
+	    }, {
+	        key: '_addStopButton',
+	        value: function _addStopButton(callback) {
+	            var btnContainer = new PIXI.Container(),
+	                btnTxt = new PIXI.Text(_config2.default.controls.stopBtn.text, _config2.default.controls.stopBtn.textStyle),
+	                btnBg = new PIXI.Graphics();
+	            btnBg.beginFill(_config2.default.controls.btn.color, 1);
+	            btnBg.drawRoundedRect(0, 0, _config2.default.controls.btn.width, _config2.default.controls.btn.height, _config2.default.controls.btn.cornersRadius);
+	            btnBg.endFill();
+	            btnBg = new PIXI.Sprite(btnBg.generateCanvasTexture());
+
+	            btnTxt.x = (_config2.default.controls.btn.width - btnTxt.width) / 2;
+	            btnTxt.y = (_config2.default.controls.btn.height - btnTxt.height) / 2;
+
+	            btnContainer.addChild(btnBg);
+	            btnContainer.addChild(btnTxt);
+
+	            btnContainer.interactive = btnContainer.buttonMode = true;
+	            btnContainer.defaultCursor = 'pointer';
+	            btnContainer.click = callback;
+
+	            btnContainer.position = new PIXI.Point(_config2.default.controls.stopBtn.x, _config2.default.controls.stopBtn.y);
+
+	            this.addChild(btnContainer);
+	        }
+	    }, {
+	        key: '_addAboutButton',
+	        value: function _addAboutButton(callback) {
+	            var btnContainer = new PIXI.Container(),
+	                btnTxt = new PIXI.Text(_config2.default.controls.aboutBtn.text, _config2.default.controls.aboutBtn.textStyle),
+	                btnBg = new PIXI.Graphics();
+	            btnBg.beginFill(_config2.default.controls.btn.color, 1);
+	            btnBg.drawRoundedRect(0, 0, _config2.default.controls.btn.width, _config2.default.controls.btn.height, _config2.default.controls.btn.cornersRadius);
+	            btnBg.endFill();
+	            btnBg = new PIXI.Sprite(btnBg.generateCanvasTexture());
+
+	            btnTxt.x = (_config2.default.controls.btn.width - btnTxt.width) / 2;
+	            btnTxt.y = (_config2.default.controls.btn.height - btnTxt.height) / 2;
+
+	            btnContainer.addChild(btnBg);
+	            btnContainer.addChild(btnTxt);
+
+	            btnContainer.interactive = btnContainer.buttonMode = true;
+	            btnContainer.defaultCursor = 'pointer';
+	            btnContainer.click = callback;
+
+	            btnContainer.position = new PIXI.Point(_config2.default.controls.aboutBtn.x, _config2.default.controls.aboutBtn.y);
+
+	            this.addChild(btnContainer);
+	        }
+	    }]);
+
+	    return Controls;
+	}(PIXI.Container);
+
+	exports.default = Controls;
 
 /***/ }
 /******/ ]);

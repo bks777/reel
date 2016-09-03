@@ -1,4 +1,8 @@
 let config = {
+    bgColor: 0x40e0d0,
+    fillColor: 0xfcfcfc,
+    fillAlpha: .3,
+    cornerRaduis: 20,
     left: 130,
     top: 113,
     width: 700,
@@ -112,5 +116,47 @@ let config = {
         },
         fps: 60
     },
+    controls: {
+        width: 700,
+        height: 150,
+        x: 300,
+        y: 600,
+        btn: {
+            width: 100,
+            height: 45,
+            color: 0xfcfcfc,
+            cornersRadius: 5
+        },
+        startBtn: {
+            x: 10,
+            y: 10,
+            text: 'START!',
+            textStyle: {
+                font: 'bold 14px Arial',
+                fill: '#00ff00',
+                stroke: '#000000'
+            }
+        },
+        stopBtn: {
+            x: 120,
+            y: 10,
+            text: 'STOP!',
+            textStyle: {
+                font: 'bold 14px Arial',
+                fill: '#ff0000',
+                stroke: '#000000'
+            }
+        },
+        aboutBtn: {
+            x: 230,
+            y: 10,
+            text: 'Info',
+            textStyle: {
+                font: 'bold 20px Arial',
+                fill: '#cccccc',
+                stroke: '#000000'
+            }
+        },
+    }
 };
 export default config;

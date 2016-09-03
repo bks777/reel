@@ -1,58 +1,90 @@
 const PIXI = window.PIXI;
 import config from './config';
 import Reel from './Reel';
+import Controls from './Controls';
+
+/**
+ * Creating of random number
+ * @param min {Number} from
+ * @param max {Number} to
+ * @returns {*}
+ */
+ function getRandomNumber(min, max){
+    return Math.floor(Math.random() * (max - min)) + min;
+}
 
 export default class SlotMachine {
     /**
      * States getters
      */
-    static get STATE_DATA_LOADED() {
-        return 1;
-    }
-
-    static get STATE_STOP() {
-        return 2;
-    }
-
-    static get STATE_STARTING() {
-        return 3;
-    }
-
-    static get STATE_RUN() {
-        return 4;
-    }
-
-    static get STATE_STOPPING() {
-        return 5;
-    }
-
-    static get STATE_FINISHING() {
-        return 6;
-    }
-
-    static get STATE_NEED_FINISH() {
-        return 7;
-    }
-
-    static get STATE_NEED_START() {
-        return 8;
-    }
+    static get STATE_DATA_LOADED() {return 1;}
+    static get STATE_STOP () {      return 2;}
+    static get STATE_STARTING () {  return 3;}
+    static get STATE_RUN () {       return 4;}
+    static get STATE_STOPPING () {  return 5;}
 
     /**
      * Constructor for reelSystem
-     * @param config {Object} consists parsed JSON with images and init data
+     * @param conf {Object} consists parsed JSON with images and init data
      * @constructor
      */
-    constructor(config) {
+    constructor(conf) {
         this.state = false;
         this._rootContainer = new PIXI.Container();
-        this.initRenderer(config.parent, config.width, config.height);
-        this.initTextures(config.images)
+
+        this.initRenderer(conf.parent, conf.width, conf.height);
+        this.initTextures(conf.images)
             .then(()=> {
                 this.state = SlotMachine.STATE_DATA_LOADED;
             });
         this.startCounter = 0;
         this.initSlotMachine();
+
+        this._rootContainer.x = config.left;
+        this._rootContainer.y = config.top;
+        this._rootContainer.width = config.width;
+        this._rootContainer.height = config.height;
+        this._setMask(config.width, config.height);
+        this._fillStageBg(config.bgColor, conf.width, conf.height);
+
+    }
+
+    /**
+     * Setting mask for main screen of reelSystem
+     * Decoration for reels
+     * @param width
+     * @param height
+     * @private
+     */
+    _setMask(width, height){
+        let mask = new PIXI.Graphics(),
+            rect = new PIXI.Graphics();
+        mask.beginFill();
+        mask.drawRoundedRect(config.left, config.top, width, height, config.cornerRaduis);
+        mask.endFill();
+        this.stage.addChild(mask);
+        this._rootContainer.mask = mask;
+
+        rect.beginFill(config.fillColor, config.fillAlpha);
+        rect.drawRoundedRect(config.left, config.top, width, height, config.cornerRaduis);
+        rect.endFill();
+
+        this.stage.addChildAt(rect, 1);
+    }
+
+    /**
+     * Adds back color
+     * @param color
+     * @param width
+     * @param height
+     * @private
+     */
+    _fillStageBg(color, width = 1280, height = 720){
+        let bgFiller = new PIXI.Graphics();
+        bgFiller.beginFill(color, 1);
+        bgFiller.drawRect(0, 0, width, height);
+        bgFiller.endFill();
+        this.stage.addChildAt(new PIXI.Sprite(bgFiller.generateCanvasTexture()), 0);
     }
 
     /**
@@ -75,9 +107,6 @@ export default class SlotMachine {
         this.stage = stage;
         this.ticker = ticker;
         PIXI.customTicker = ticker;
-
-        window.startReels = this.startReels.bind(this);
-        window.stopReels = this.stopReels.bind(this);
     }
 
     /**
@@ -122,10 +151,11 @@ export default class SlotMachine {
             this.startCounter++;
             return;
         }
-        console.info('!!! START !!!');
         this.startCounter = undefined;
         this.state = SlotMachine.STATE_STOP;
-        this.initReels()
+        this.initReels();
+        this.controls = new Controls(this.startReels.bind(this), this.stopReels.bind(this), ()=>{console.info('K.Bokov production')});
+        this.stage.addChild(this.controls);
     }
 
     /**
@@ -223,11 +253,23 @@ export default class SlotMachine {
         }
     }
 
-    isRunning () {
-        return this.state !== SlotMachine.STATE_STOP;
-    }
-
+    /**
+     * Server imitation
+     * @returns {Array}
+     */
     get randomValues(){
-        return [[1,3,4],[2,4,3],[5,1,5],[2,3,1],[4,4,3]];
+        let cols = 5,
+            raws = 3,
+            arr = [],
+            innerArr;
+        for(let col = 0; col < cols; col++){
+            innerArr = [];
+            for(let raw = 0; raw < raws; raw++){
+                innerArr.push(getRandomNumber(1, 5))
+            }
+            arr.push(innerArr);
+        }
+
+        return arr;
     }
 }
