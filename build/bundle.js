@@ -391,7 +391,7 @@
 	                        return;
 	                    }
 
-	                    _this2.reels[i].stop(values[i]).then(function () {
+	                    _this2.reels[i].stop(_this2.randomValues[i]).then(function () {
 	                        reelsStopped++;
 
 	                        if (reelsStopped === _this2.reels.length) {
@@ -432,23 +432,6 @@
 	                }, this);
 	            }
 	        }
-
-	        // setSymbol (reel, row, symbol, symbolType) {
-	        //     this.reels[reel].setSymbol (row, symbol, symbolType);
-	        // }
-	        //
-	        // setSymbolType (reel, row, symbolType) {
-	        //     this.reels[reel].setSymbolType (row, symbolType);
-	        // }
-	        //
-	        // setSymbols (symbols) {
-	        //     for (let i = 0; i < symbols.length; i++) {
-	        //         for (let j = 0; j < symbols[i].length; j++) {
-	        //             this.reels[i].setSymbol (j+1, symbols[i][j]);
-	        //         }
-	        //     }
-	        // }
-
 	    }, {
 	        key: 'isRunning',
 	        value: function isRunning() {
@@ -457,7 +440,7 @@
 	    }, {
 	        key: 'randomValues',
 	        get: function get() {
-	            return null;
+	            return [[1, 3, 4], [2, 4, 3], [5, 1, 5], [2, 3, 1], [4, 4, 3]];
 	        }
 	    }]);
 
@@ -806,9 +789,6 @@
 	            }
 
 	            if (this.needDefaultSymbols && (this.state === Reel.STATE_NEED_FINISH || this.state === Reel.STATE_FINISHING || this.state === Reel.STATE_STOP)) {
-	                for (var i = 0; i < this.elements.length; i++) {
-	                    this.elements[i].setSymbolType("def");
-	                }
 	                this.needDefaultSymbols = false;
 	            }
 	        }
@@ -827,7 +807,7 @@
 	            if (this.state === Reel.STATE_STOPPING) {
 	                newEl = this.createElement(this.values[this.stoppedRows], type);
 	                this.stoppedRows++;
-	                if (this.stoppedRows > this.numChildren) {
+	                if (this.stoppedRows > this.children.length) {
 	                    this.state = Reel.STATE_NEED_FINISH;
 	                    this.stoppedRows = 0;
 	                }

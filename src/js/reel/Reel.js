@@ -154,9 +154,6 @@ export default class Reel extends PIXI.Container {
                         || this.state === Reel.STATE_STOP
                 )
         ){
-            for (let i = 0; i < this.elements.length; i++) {
-                this.elements[i].setSymbolType("def");
-            }
             this.needDefaultSymbols = false;
         }
     }
@@ -172,7 +169,7 @@ export default class Reel extends PIXI.Container {
         if (this.state === Reel.STATE_STOPPING) {
             newEl = this.createElement(this.values[this.stoppedRows], type);
             this.stoppedRows++;
-            if (this.stoppedRows > this.numChildren) {
+            if (this.stoppedRows > this.children.length) {
                 this.state = Reel.STATE_NEED_FINISH;
                 this.stoppedRows = 0;
             }

@@ -183,7 +183,7 @@ export default class SlotMachine {
                     return;
                 }
 
-                this.reels[i].stop(values[i])
+                this.reels[i].stop(this.randomValues[i])
                     .then (() => {
                         reelsStopped++;
 
@@ -223,27 +223,11 @@ export default class SlotMachine {
         }
     }
 
-    // setSymbol (reel, row, symbol, symbolType) {
-    //     this.reels[reel].setSymbol (row, symbol, symbolType);
-    // }
-    //
-    // setSymbolType (reel, row, symbolType) {
-    //     this.reels[reel].setSymbolType (row, symbolType);
-    // }
-    //
-    // setSymbols (symbols) {
-    //     for (let i = 0; i < symbols.length; i++) {
-    //         for (let j = 0; j < symbols[i].length; j++) {
-    //             this.reels[i].setSymbol (j+1, symbols[i][j]);
-    //         }
-    //     }
-    // }
-
     isRunning () {
         return this.state !== SlotMachine.STATE_STOP;
     }
 
     get randomValues(){
-        return null;
+        return [[1,3,4],[2,4,3],[5,1,5],[2,3,1],[4,4,3]];
     }
 }
