@@ -374,11 +374,11 @@
 	        value: function initSlotMachine() {
 	            clearInterval(this.startInterval);
 	            if (this.state !== SlotMachine.STATE_DATA_LOADED) {
-	                if (this.startCounter > 15) {
+	                if (this.startCounter > 5) {
 	                    console.error('something happened during data parsing.\nTry to reload the page ;-(');
 	                    return;
 	                }
-	                console.info('images not loaded, \nanother try in 1 sec');
+	                // console.info('images not loaded, \nanother try in 1 sec');
 	                this.startInterval = setInterval(this.initSlotMachine.bind(this), 1000);
 	                this.startCounter++;
 	                return;
@@ -386,10 +386,24 @@
 	            this.startCounter = undefined;
 	            this.state = SlotMachine.STATE_STOP;
 	            this.initReels();
+	            this.addDescriptionLabel();
 	            this.controls = new _Controls2.default(this.startReels.bind(this), this.stopReels.bind(this), function () {
 	                console.info('K.Bokov production');
 	            });
 	            this.stage.addChild(this.controls);
+	        }
+
+	        /**
+	         *
+	         */
+
+	    }, {
+	        key: 'addDescriptionLabel',
+	        value: function addDescriptionLabel() {
+	            var text = new PIXI.Text(_config2.default.descrtiptionLabel.text, _config2.default.descrtiptionLabel.textStyle);
+	            text.position = new PIXI.Point(_config2.default.descrtiptionLabel.x, _config2.default.descrtiptionLabel.y);
+
+	            this.stage.addChild(text);
 	        }
 
 	        /**
@@ -446,7 +460,6 @@
 	            var _this2 = this;
 
 	            if (this.state === SlotMachine.STATE_RUN) {
-	                // let values = this.randomValues;
 	                return new Promise(function (resolve, reject) {
 	                    _this2._delayBetweenReelsStop = _config2.default.delayBetweenReelsStop !== undefined ? _config2.default.delayBetweenReelsStop : 0;
 
@@ -480,6 +493,8 @@
 
 	                    setTimeout(stopThreadCallback, _this2._delayBetweenReelsStop);
 	                });
+	            } else {
+	                //click on STOP while reels are stopped
 	            }
 	        }
 
@@ -633,43 +648,47 @@
 	    controls: {
 	        width: 700,
 	        height: 150,
-	        x: 350,
-	        y: 580,
+	        x: 280,
+	        y: 550,
 	        btn: {
-	            width: 100,
-	            height: 45,
+	            width: 200,
+	            height: 90,
 	            color: 0xfcfcfc,
-	            cornersRadius: 5
+	            cornersRadius: 15
 	        },
 	        startBtn: {
 	            x: 10,
 	            y: 10,
 	            text: 'START!',
 	            textStyle: {
-	                font: 'bold 14px Arial',
+	                font: 'bold 24px Arial',
 	                fill: '#00ff00',
-	                stroke: '#000000'
+	                stroke: '#cccccc',
+	                strokeThickness: 2
 	            }
 	        },
 	        stopBtn: {
-	            x: 120,
+	            x: 220,
 	            y: 10,
 	            text: 'STOP!',
 	            textStyle: {
-	                font: 'bold 14px Arial',
+	                font: 'bold 24px Arial',
 	                fill: '#ff0000',
-	                stroke: '#000000'
+	                stroke: '#cccccc',
+	                strokeThickness: 2
 	            }
-	        },
-	        aboutBtn: {
-	            x: 230,
-	            y: 10,
-	            text: 'Info',
-	            textStyle: {
-	                font: 'bold 20px Arial',
-	                fill: '#cccccc',
-	                stroke: '#000000'
-	            }
+	        }
+	    },
+
+	    descrtiptionLabel: {
+	        x: 50,
+	        y: 30,
+	        text: "Hello! It's a simple and quality slot machine solution made by Kostiantyn Bokov.",
+	        textStyle: {
+	            font: '64px Arial',
+	            fill: '#ffffff',
+	            stroke: '#34495e',
+	            strokeThickness: 2
 	        }
 	    }
 	};

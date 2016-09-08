@@ -157,11 +157,11 @@ export default class SlotMachine {
     initSlotMachine() {
         clearInterval(this.startInterval);
         if (this.state !== SlotMachine.STATE_DATA_LOADED) {
-            if (this.startCounter > 15) {
+            if (this.startCounter > 5) {
                 console.error('something happened during data parsing.\nTry to reload the page ;-(');
                 return;
             }
-            console.info('images not loaded, \nanother try in 1 sec');
+            // console.info('images not loaded, \nanother try in 1 sec');
             this.startInterval = setInterval(this.initSlotMachine.bind(this), 1000);
             this.startCounter++;
             return;
@@ -169,8 +169,19 @@ export default class SlotMachine {
         this.startCounter = undefined;
         this.state = SlotMachine.STATE_STOP;
         this.initReels();
+        this.addDescriptionLabel();
         this.controls = new Controls(this.startReels.bind(this), this.stopReels.bind(this), ()=>{console.info('K.Bokov production')});
         this.stage.addChild(this.controls);
+    }
+
+    /**
+     * Adding of top label
+     */
+    addDescriptionLabel(){
+        let text = new PIXI.Text(config.descrtiptionLabel.text, config.descrtiptionLabel.textStyle);
+        text.position = new PIXI.Point(config.descrtiptionLabel.x, config.descrtiptionLabel.y);
+
+        this.stage.addChild(text);
     }
 
     /**
