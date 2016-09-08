@@ -215,41 +215,43 @@ export default class SlotMachine {
      * @returns {Promise}
      */
     stopReels () {
-        let values = this.randomValues;
-        return new Promise ( (resolve, reject) => {
-            this._delayBetweenReelsStop = (config.delayBetweenReelsStop !== undefined ? config.delayBetweenReelsStop : 0);
+        if(this.state === SlotMachine.STATE_RUN){
+            return new Promise ( (resolve, reject) => {
+                this._delayBetweenReelsStop = (config.delayBetweenReelsStop !== undefined ? config.delayBetweenReelsStop : 0);
 
-            /* stop with delay */
-            this.state = SlotMachine.STATE_STOPPING;
-            let i = 0,
-                reelsStopped = 0,
-                stopThreadCallback = (callback = stopThreadCallback)=>{
-                if (i > this.reels.length-1){
-                    return;
-                }
-
-                this.reels[i].stop(this.randomValues[i])
-                    .then (() => {
-                        reelsStopped++;
-
-                        if (reelsStopped === this.reels.length) {
-                            this.state = SlotMachine.STATE_STOP;
-                            resolve();
+                /* stop with delay */
+                this.state = SlotMachine.STATE_STOPPING;
+                let i = 0,
+                    reelsStopped = 0,
+                    stopThreadCallback = (callback = stopThreadCallback)=>{
+                        if (i > this.reels.length-1){
+                            return;
                         }
-                    })
-                    .catch((rejection) => {
-                        reject(rejection);
-                    });
 
-                i++;
-                if (callback){
-                    setTimeout(callback, this._delayBetweenReelsStop);
-                }
-            };
+                        this.reels[i].stop(this.randomValues[i])
+                            .then (() => {
+                                reelsStopped++;
 
-            setTimeout(stopThreadCallback, this._delayBetweenReelsStop );
-        });
+                                if (reelsStopped === this.reels.length) {
+                                    this.state = SlotMachine.STATE_STOP;
+                                    resolve();
+                                }
+                            })
+                            .catch((rejection) => {
+                                reject(rejection);
+                            });
 
+                        i++;
+                        if (callback){
+                            setTimeout(callback, this._delayBetweenReelsStop);
+                        }
+                    };
+
+                setTimeout(stopThreadCallback, this._delayBetweenReelsStop );
+            });
+        } else {
+            //click on STOP while reels are stopped
+        }
     }
 
     /**

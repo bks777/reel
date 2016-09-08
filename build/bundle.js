@@ -445,40 +445,42 @@
 	        value: function stopReels() {
 	            var _this2 = this;
 
-	            var values = this.randomValues;
-	            return new Promise(function (resolve, reject) {
-	                _this2._delayBetweenReelsStop = _config2.default.delayBetweenReelsStop !== undefined ? _config2.default.delayBetweenReelsStop : 0;
+	            if (this.state === SlotMachine.STATE_RUN) {
+	                // let values = this.randomValues;
+	                return new Promise(function (resolve, reject) {
+	                    _this2._delayBetweenReelsStop = _config2.default.delayBetweenReelsStop !== undefined ? _config2.default.delayBetweenReelsStop : 0;
 
-	                /* stop with delay */
-	                _this2.state = SlotMachine.STATE_STOPPING;
-	                var i = 0,
-	                    reelsStopped = 0,
-	                    stopThreadCallback = function stopThreadCallback() {
-	                    var callback = arguments.length <= 0 || arguments[0] === undefined ? stopThreadCallback : arguments[0];
+	                    /* stop with delay */
+	                    _this2.state = SlotMachine.STATE_STOPPING;
+	                    var i = 0,
+	                        reelsStopped = 0,
+	                        stopThreadCallback = function stopThreadCallback() {
+	                        var callback = arguments.length <= 0 || arguments[0] === undefined ? stopThreadCallback : arguments[0];
 
-	                    if (i > _this2.reels.length - 1) {
-	                        return;
-	                    }
-
-	                    _this2.reels[i].stop(_this2.randomValues[i]).then(function () {
-	                        reelsStopped++;
-
-	                        if (reelsStopped === _this2.reels.length) {
-	                            _this2.state = SlotMachine.STATE_STOP;
-	                            resolve();
+	                        if (i > _this2.reels.length - 1) {
+	                            return;
 	                        }
-	                    }).catch(function (rejection) {
-	                        reject(rejection);
-	                    });
 
-	                    i++;
-	                    if (callback) {
-	                        setTimeout(callback, _this2._delayBetweenReelsStop);
-	                    }
-	                };
+	                        _this2.reels[i].stop(_this2.randomValues[i]).then(function () {
+	                            reelsStopped++;
 
-	                setTimeout(stopThreadCallback, _this2._delayBetweenReelsStop);
-	            });
+	                            if (reelsStopped === _this2.reels.length) {
+	                                _this2.state = SlotMachine.STATE_STOP;
+	                                resolve();
+	                            }
+	                        }).catch(function (rejection) {
+	                            reject(rejection);
+	                        });
+
+	                        i++;
+	                        if (callback) {
+	                            setTimeout(callback, _this2._delayBetweenReelsStop);
+	                        }
+	                    };
+
+	                    setTimeout(stopThreadCallback, _this2._delayBetweenReelsStop);
+	                });
+	            }
 	        }
 
 	        /**
