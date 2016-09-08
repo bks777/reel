@@ -23,6 +23,7 @@ Component was apportioned for:
 * **[Controls](https://github.com/bks777/reel/blob/master/src/js/reel/Controls.js)** - all buttons.
 
 I would like to add such features in future:
+* Mobile devices support
 * More animations, with different ease effects;
 * Live editing of config with [dat.gui](https://workshop.chromeexperiments.com/examples/gui/#1--Basic-Usage)
 * blurred and disable symbols types
