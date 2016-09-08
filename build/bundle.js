@@ -306,19 +306,33 @@
 	            var width = arguments.length <= 1 || arguments[1] === undefined ? 640 : arguments[1];
 	            var height = arguments.length <= 2 || arguments[2] === undefined ? 480 : arguments[2];
 
-	            var renderer = PIXI.autoDetectRenderer(width, height, { antialias: true, resolution: 1 }),
+	            var renderer = PIXI.autoDetectRenderer(width, height, {
+	                antialiasing: true,
+	                resolution: window.devicePixelRatio,
+	                autoResize: true
+	            }),
 	                stage = new PIXI.Container(),
 	                ticker = new PIXI.ticker.Ticker();
-
+	            renderer.view.style.position = "absolute";
+	            renderer.view.style.top = "0px";
+	            renderer.view.style.left = "0px";
 	            document.getElementById(parent).appendChild(renderer.view);
+	            resize();
 	            ticker.add(function () {
 	                renderer.render(stage);
 	            });
+	            window.addEventListener("resize", resize);
 	            ticker.start();
 
 	            this.stage = stage;
 	            this.ticker = ticker;
 	            PIXI.customTicker = ticker;
+
+	            function resize() {
+	                window.ratio = Math.min(window.innerWidth / width, window.innerHeight / height);
+	                stage.scale.x = stage.scale.y = ratio;
+	                renderer.resize(Math.ceil(width * ratio), Math.ceil(height * ratio));
+	            }
 	        }
 
 	        /**
@@ -487,11 +501,6 @@
 	                }, this);
 	            }
 	        }
-	    }, {
-	        key: 'isRunning',
-	        value: function isRunning() {
-	            return this.state !== SlotMachine.STATE_STOP;
-	        }
 
 	        /**
 	         * Server imitation
@@ -579,7 +588,6 @@
 	        distanceBetweenRows: 0,
 	        animation: "standard",
 	        numOfSymbols: 14,
-	        // blurWhileRun: false,
 	        speed: 3500,
 	        startParabolaSize: 0,
 	        startParabolaTime: 0,
@@ -588,42 +596,34 @@
 	        defaultTypeOfSymbol: "def",
 	        symbols: {
 	            1: {
-	                types: ["def", "blur"],
+	                types: ["def"],
 	                name: "el_1"
 	            },
 	            2: {
-	                types: ["def", "blur"],
+	                types: ["def"],
 	                name: "el_2"
 	            },
 	            3: {
-	                types: ["def", "blur"],
+	                types: ["def"],
 	                name: "el_3"
 	            },
 	            4: {
-	                types: ["def", "blur"],
+	                types: ["def"],
 	                name: "el_4"
 	            },
 	            5: {
-	                types: ["def", "blur"],
+	                types: ["def"],
 	                name: "el_5"
 	            }
 	        },
 	        symbolTypes: {
 	            "def": {
 	                scale: 1
-	            },
-	            "disable": {
-	                scale: 1
-	            },
-	            "blur": {
-	                scale: 1.33
 	            }
 	        },
 	        allowedSymbolTypes: {
 	            "default": {
-	                "def": "def",
-	                "disable": "disable",
-	                "blur": "blur"
+	                "def": "def"
 	            }
 	        },
 	        fps: 60
@@ -631,8 +631,8 @@
 	    controls: {
 	        width: 700,
 	        height: 150,
-	        x: 300,
-	        y: 600,
+	        x: 350,
+	        y: 580,
 	        btn: {
 	            width: 100,
 	            height: 45,
@@ -886,7 +886,7 @@
 	                type = this.config.defaultTypeOfSymbol;
 	            }
 
-	            var el = new _Element2.default(num, type, this.config.symbols[num], this.config.textures[this.config.symbols[num].name]);
+	            var el = new _Element2.default(this.config.textures[this.config.symbols[num].name]);
 
 	            el.width = this.config.width;
 	            el.height = this.config.rowHeight;
@@ -1002,17 +1002,6 @@
 	        value: function start() {
 	            this.state = Reel.STATE_NEED_START;
 	        }
-
-	        /**
-	         * getter for check of running
-	         * @returns {boolean}
-	         */
-
-	    }, {
-	        key: 'isRunning',
-	        value: function isRunning() {
-	            return this.state !== Reel.STATE_STOP;
-	        }
 	    }]);
 
 	    return Reel;
@@ -1045,20 +1034,14 @@
 
 	    /**
 	     * Init of single symbol
-	     * @param symbolNumber
-	     * @param symbolType
-	     * @param configOfSymbol
 	     * @param texture
 	     * @constructor
 	     */
-	    function Element(symbolNumber, symbolType, configOfSymbol, texture) {
+	    function Element(texture) {
 	        _classCallCheck(this, Element);
 
 	        var _this = _possibleConstructorReturn(this, (Element.__proto__ || Object.getPrototypeOf(Element)).call(this));
 
-	        _this.symbolNumber = symbolNumber;
-	        _this.imageAlias = symbolType + "_" + symbolNumber;
-	        _this.configOfSymbol = configOfSymbol;
 	        _this.texture = texture;
 
 	        _this._addContent();
@@ -1076,39 +1059,6 @@
 	        value: function _addContent() {
 	            this.content = new PIXI.Sprite(this.texture);
 	            this.addChild(this.content);
-	        }
-
-	        /**
-	         * Changes texture
-	         * @param spriteSheet
-	         */
-
-	    }, {
-	        key: "setSpriteSheet",
-	        value: function setSpriteSheet(spriteSheet) {
-	            this.content.texture = spriteSheet;
-	        }
-
-	        /**
-	         * Getter for the symbol name
-	         * @returns {*}
-	         */
-
-	    }, {
-	        key: "getSymbolName",
-	        value: function getSymbolName() {
-	            return this.configOfSymbol.name;
-	        }
-
-	        /**
-	         * Getter for the content
-	         * @returns {PIXI.Sprite}
-	         */
-
-	    }, {
-	        key: "getContent",
-	        value: function getContent() {
-	            return this.content;
 	        }
 	    }]);
 
@@ -1279,7 +1229,14 @@
 	var Controls = function (_PIXI$Container) {
 	    _inherits(Controls, _PIXI$Container);
 
-	    function Controls(startBtnCallback, stopBtnCallback, aboutBtnCallbak) {
+	    /**
+	     * Init of buttons
+	     * @param startBtnCallback
+	     * @param stopBtnCallback
+	     * @extends PIXI.Container
+	     * @constructor
+	     */
+	    function Controls(startBtnCallback, stopBtnCallback) {
 	        _classCallCheck(this, Controls);
 
 	        var _this = _possibleConstructorReturn(this, (Controls.__proto__ || Object.getPrototypeOf(Controls)).call(this));
@@ -1289,84 +1246,81 @@
 	        _this.position = new PIXI.Point(_config2.default.controls.x, _config2.default.controls.y);
 	        _this._addStartButton(startBtnCallback);
 	        _this._addStopButton(stopBtnCallback);
-	        _this._addAboutButton(aboutBtnCallbak);
 	        return _this;
 	    }
+
+	    /**
+	     * Inits and adds a START button
+	     * @param callback
+	     * @private
+	     */
+
 
 	    _createClass(Controls, [{
 	        key: '_addStartButton',
 	        value: function _addStartButton(callback) {
-	            var btnContainer = new PIXI.Container(),
-	                btnTxt = new PIXI.Text(_config2.default.controls.startBtn.text, _config2.default.controls.startBtn.textStyle),
-	                btnBg = new PIXI.Graphics();
-	            btnBg.beginFill(_config2.default.controls.btn.color, 1);
-	            btnBg.drawRoundedRect(0, 0, _config2.default.controls.btn.width, _config2.default.controls.btn.height, _config2.default.controls.btn.cornersRadius);
-	            btnBg.endFill();
-	            btnBg = new PIXI.Sprite(btnBg.generateCanvasTexture());
+	            var startBtn = this._createButton({
+	                text: _config2.default.controls.startBtn.text,
+	                textStyle: _config2.default.controls.startBtn.textStyle,
+	                x: _config2.default.controls.startBtn.x,
+	                y: _config2.default.controls.startBtn.y,
+	                callback: callback
+	            });
 
-	            btnTxt.x = (_config2.default.controls.btn.width - btnTxt.width) / 2;
-	            btnTxt.y = (_config2.default.controls.btn.height - btnTxt.height) / 2;
-
-	            btnContainer.addChild(btnBg);
-	            btnContainer.addChild(btnTxt);
-
-	            btnContainer.interactive = btnContainer.buttonMode = true;
-	            btnContainer.defaultCursor = 'pointer';
-	            btnContainer.click = callback;
-
-	            btnContainer.position = new PIXI.Point(_config2.default.controls.startBtn.x, _config2.default.controls.startBtn.y);
-
-	            this.addChild(btnContainer);
+	            this.addChild(startBtn);
 	        }
+
+	        /**
+	         * Inits and adds a STOP button
+	         * @param callback
+	         * @private
+	         */
+
 	    }, {
 	        key: '_addStopButton',
 	        value: function _addStopButton(callback) {
-	            var btnContainer = new PIXI.Container(),
-	                btnTxt = new PIXI.Text(_config2.default.controls.stopBtn.text, _config2.default.controls.stopBtn.textStyle),
-	                btnBg = new PIXI.Graphics();
-	            btnBg.beginFill(_config2.default.controls.btn.color, 1);
-	            btnBg.drawRoundedRect(0, 0, _config2.default.controls.btn.width, _config2.default.controls.btn.height, _config2.default.controls.btn.cornersRadius);
-	            btnBg.endFill();
-	            btnBg = new PIXI.Sprite(btnBg.generateCanvasTexture());
+	            var stopButton = this._createButton({
+	                text: _config2.default.controls.stopBtn.text,
+	                textStyle: _config2.default.controls.stopBtn.textStyle,
+	                x: _config2.default.controls.stopBtn.x,
+	                y: _config2.default.controls.stopBtn.y,
+	                callback: callback
+	            });
 
-	            btnTxt.x = (_config2.default.controls.btn.width - btnTxt.width) / 2;
-	            btnTxt.y = (_config2.default.controls.btn.height - btnTxt.height) / 2;
-
-	            btnContainer.addChild(btnBg);
-	            btnContainer.addChild(btnTxt);
-
-	            btnContainer.interactive = btnContainer.buttonMode = true;
-	            btnContainer.defaultCursor = 'pointer';
-	            btnContainer.click = callback;
-
-	            btnContainer.position = new PIXI.Point(_config2.default.controls.stopBtn.x, _config2.default.controls.stopBtn.y);
-
-	            this.addChild(btnContainer);
+	            this.addChild(stopButton);
 	        }
+
+	        /**
+	         * Inits a button object with data
+	         * @param conf
+	         * @private
+	         */
+
 	    }, {
-	        key: '_addAboutButton',
-	        value: function _addAboutButton(callback) {
+	        key: '_createButton',
+	        value: function _createButton(conf) {
 	            var btnContainer = new PIXI.Container(),
-	                btnTxt = new PIXI.Text(_config2.default.controls.aboutBtn.text, _config2.default.controls.aboutBtn.textStyle),
+	                btn = new PIXI.Text(conf.text, conf.textStyle),
 	                btnBg = new PIXI.Graphics();
+
 	            btnBg.beginFill(_config2.default.controls.btn.color, 1);
 	            btnBg.drawRoundedRect(0, 0, _config2.default.controls.btn.width, _config2.default.controls.btn.height, _config2.default.controls.btn.cornersRadius);
 	            btnBg.endFill();
 	            btnBg = new PIXI.Sprite(btnBg.generateCanvasTexture());
 
-	            btnTxt.x = (_config2.default.controls.btn.width - btnTxt.width) / 2;
-	            btnTxt.y = (_config2.default.controls.btn.height - btnTxt.height) / 2;
+	            btn.x = (_config2.default.controls.btn.width - btn.width) / 2;
+	            btn.y = (_config2.default.controls.btn.height - btn.height) / 2;
 
 	            btnContainer.addChild(btnBg);
-	            btnContainer.addChild(btnTxt);
+	            btnContainer.addChild(btn);
 
 	            btnContainer.interactive = btnContainer.buttonMode = true;
 	            btnContainer.defaultCursor = 'pointer';
-	            btnContainer.click = callback;
+	            btnContainer.click = btnContainer.touchend = conf.callback;
 
-	            btnContainer.position = new PIXI.Point(_config2.default.controls.aboutBtn.x, _config2.default.controls.aboutBtn.y);
+	            btnContainer.position = new PIXI.Point(conf.x, conf.y);
 
-	            this.addChild(btnContainer);
+	            return btnContainer;
 	        }
 	    }]);
 

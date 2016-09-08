@@ -126,9 +126,6 @@ export default class Reel extends PIXI.Container {
         }
 
         let el = new Element (
-            num,
-            type,
-            this.config.symbols[num],
             this.config.textures[this.config.symbols[num].name]
         );
 
@@ -232,13 +229,5 @@ export default class Reel extends PIXI.Container {
      */
     start () {
         this.state = Reel.STATE_NEED_START;
-    }
-
-    /**
-     * getter for check of running
-     * @returns {boolean}
-     */
-    isRunning () {
-        return this.state !== Reel.STATE_STOP;
     }
 }

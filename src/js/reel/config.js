@@ -52,7 +52,6 @@ let config = {
         distanceBetweenRows: 0,
         animation: "standard",
         numOfSymbols: 14,
-        // blurWhileRun: false,
         speed: 3500,
         startParabolaSize: 0,
         startParabolaTime: 0,
@@ -62,36 +61,31 @@ let config = {
         symbols: {
             1: {
                 types: [
-                    "def",
-                    "blur",
+                    "def"
                 ],
                 name: "el_1"
             },
             2: {
                 types: [
-                    "def",
-                    "blur"
+                    "def"
                 ],
                 name: "el_2"
             },
             3: {
                 types: [
-                    "def",
-                    "blur"
+                    "def"
                 ],
                 name: "el_3"
             },
             4: {
                 types: [
-                    "def",
-                    "blur"
+                    "def"
                 ],
                 name: "el_4"
             },
             5: {
                 types: [
-                    "def",
-                    "blur"
+                    "def"
                 ],
                 name: "el_5"
             }
@@ -99,19 +93,11 @@ let config = {
         symbolTypes: {
             "def": {
                 scale: 1
-            },
-            "disable": {
-                scale: 1
-            },
-            "blur": {
-                scale: 1.33
             }
         },
         allowedSymbolTypes: {
             "default": {
-                "def": "def",
-                "disable": "disable",
-                "blur": "blur"
+                "def": "def"
             }
         },
         fps: 60
@@ -119,8 +105,8 @@ let config = {
     controls: {
         width: 700,
         height: 150,
-        x: 300,
-        y: 600,
+        x: 350,
+        y: 580,
         btn: {
             width: 100,
             height: 45,

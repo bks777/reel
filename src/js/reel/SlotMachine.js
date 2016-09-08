@@ -94,19 +94,34 @@ export default class SlotMachine {
      * @param height {Number} height of a stage
      */
     initRenderer(parent = 'container', width = 640, height = 480) {
-        let renderer = PIXI.autoDetectRenderer(width, height, {antialias: true, resolution: 1}),
+        let renderer = PIXI.autoDetectRenderer(width, height, {
+                antialiasing: true,
+                resolution: window.devicePixelRatio,
+                autoResize: true
+            }),
             stage = new PIXI.Container(),
             ticker = new PIXI.ticker.Ticker();
-
+        renderer.view.style.position = "absolute";
+        renderer.view.style.top = "0px";
+        renderer.view.style.left = "0px";
         document.getElementById(parent).appendChild(renderer.view);
+        resize();
         ticker.add(()=> {
             renderer.render(stage);
         });
+        window.addEventListener("resize", resize);
         ticker.start();
 
         this.stage = stage;
         this.ticker = ticker;
         PIXI.customTicker = ticker;
+
+        function resize() {
+            window.ratio = Math.min(window.innerWidth/width,
+                window.innerHeight/height);
+            stage.scale.x = stage.scale.y = ratio;
+            renderer.resize(Math.ceil(width * ratio), Math.ceil(height * ratio));
+        }
     }
 
     /**

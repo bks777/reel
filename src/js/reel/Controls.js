@@ -6,11 +6,10 @@ export default class Controls extends PIXI.Container{
      * Init of buttons
      * @param startBtnCallback
      * @param stopBtnCallback
-     * @param aboutBtnCallbak
      * @extends PIXI.Container
      * @constructor
      */
-    constructor(startBtnCallback, stopBtnCallback, aboutBtnCallbak){
+    constructor(startBtnCallback, stopBtnCallback){
         super();
 
         this.width = config.controls.width;
@@ -26,36 +25,15 @@ export default class Controls extends PIXI.Container{
      * @private
      */
     _addStartButton(callback) {
-        let btnContainer = new PIXI.Container(),
-            btnTxt = new PIXI.Text(
-                config.controls.startBtn.text,
-                config.controls.startBtn.textStyle
-            ),
-            btnBg = new PIXI.Graphics();
-        btnBg.beginFill(config.controls.btn.color, 1);
-        btnBg.drawRoundedRect(
-            0,
-            0,
-            config.controls.btn.width,
-            config.controls.btn.height,
-            config.controls.btn.cornersRadius
-        );
-        btnBg.endFill();
-        btnBg = new PIXI.Sprite(btnBg.generateCanvasTexture());
+        let startBtn = this._createButton({
+            text:  config.controls.startBtn.text,
+            textStyle: config.controls.startBtn.textStyle,
+            x: config.controls.startBtn.x,
+            y: config.controls.startBtn.y,
+            callback
+        });
 
-        btnTxt.x = (config.controls.btn.width - btnTxt.width) / 2;
-        btnTxt.y = (config.controls.btn.height - btnTxt.height) / 2;
-
-        btnContainer.addChild(btnBg);
-        btnContainer.addChild(btnTxt);
-
-        btnContainer.interactive = btnContainer.buttonMode = true;
-        btnContainer.defaultCursor = 'pointer';
-        btnContainer.click = btnContainer.touchend = callback;
-
-        btnContainer.position = new PIXI.Point(config.controls.startBtn.x, config.controls.startBtn.y)
-
-        this.addChild(btnContainer);
+        this.addChild(startBtn);
     }
 
     /**
@@ -64,12 +42,30 @@ export default class Controls extends PIXI.Container{
      * @private
      */
     _addStopButton(callback) {
+        let stopButton = this._createButton({
+            text:  config.controls.stopBtn.text,
+            textStyle: config.controls.stopBtn.textStyle,
+            x: config.controls.stopBtn.x,
+            y: config.controls.stopBtn.y,
+            callback
+        });
+
+        this.addChild(stopButton);
+    }
+
+    /**
+     * Inits a button object with data
+     * @param conf
+     * @private
+     */
+    _createButton(conf){
         let btnContainer = new PIXI.Container(),
-            btnTxt = new PIXI.Text(
-                config.controls.stopBtn.text,
-                config.controls.stopBtn.textStyle
+            btn = new PIXI.Text(
+                conf.text,
+                conf.textStyle
             ),
             btnBg = new PIXI.Graphics();
+
         btnBg.beginFill(config.controls.btn.color, 1);
         btnBg.drawRoundedRect(
             0,
@@ -81,27 +77,18 @@ export default class Controls extends PIXI.Container{
         btnBg.endFill();
         btnBg = new PIXI.Sprite(btnBg.generateCanvasTexture());
 
-        btnTxt.x = (config.controls.btn.width - btnTxt.width) / 2;
-        btnTxt.y = (config.controls.btn.height - btnTxt.height) / 2;
+        btn.x = (config.controls.btn.width - btn.width) / 2;
+        btn.y = (config.controls.btn.height - btn.height) / 2;
 
         btnContainer.addChild(btnBg);
-        btnContainer.addChild(btnTxt);
+        btnContainer.addChild(btn);
 
         btnContainer.interactive = btnContainer.buttonMode = true;
         btnContainer.defaultCursor = 'pointer';
-        btnContainer.click = btnContainer.touchend = callback;
+        btnContainer.click = btnContainer.touchend = conf.callback;
 
-        btnContainer.position = new PIXI.Point(config.controls.stopBtn.x, config.controls.stopBtn.y)
+        btnContainer.position = new PIXI.Point(conf.x, conf.y);
 
-        this.addChild(btnContainer);
-    }
-
-    /**
-     * Inits a button object with data
-     * @param config
-     * @private
-     */
-    _createButton(config){
-
+        return btnContainer;
     }
 }
