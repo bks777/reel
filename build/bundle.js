@@ -394,7 +394,7 @@
 	        }
 
 	        /**
-	         *
+	         * Adding of top label
 	         */
 
 	    }, {
@@ -686,8 +686,8 @@
 	        text: "Hello! It's a simple and quality slot machine solution made by Kostiantyn Bokov.",
 	        textStyle: {
 	            font: '64px Arial',
-	            fill: '#ffffff',
-	            stroke: '#34495e',
+	            fill: '#000000',
+	            stroke: '#cccccc',
 	            strokeThickness: 2
 	        }
 	    }
