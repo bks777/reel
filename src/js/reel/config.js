@@ -1,6 +1,6 @@
 let config = {
-    bgColor: 0x40e0d0,
-    fillColor: 0xfcfcfc,
+    bgColor: 0xcccccc,
+    fillColor: 0xffffff,
     fillAlpha: .3,
     cornerRaduis: 20,
     left: 130,

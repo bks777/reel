@@ -110,7 +110,7 @@
 	    _createClass(Loader, [{
 	        key: "httpGet",
 	        value: function httpGet() {
-	            var config = arguments.length <= 0 || arguments[0] === undefined ? { url: 'http://google.com' } : arguments[0];
+	            var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { url: 'http://google.com' };
 
 	            var request = new this.XHR();
 
@@ -282,8 +282,8 @@
 	    }, {
 	        key: '_fillStageBg',
 	        value: function _fillStageBg(color) {
-	            var width = arguments.length <= 1 || arguments[1] === undefined ? 1280 : arguments[1];
-	            var height = arguments.length <= 2 || arguments[2] === undefined ? 720 : arguments[2];
+	            var width = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1280;
+	            var height = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 720;
 
 	            var bgFiller = new PIXI.Graphics();
 	            bgFiller.beginFill(color, 1);
@@ -302,9 +302,9 @@
 	    }, {
 	        key: 'initRenderer',
 	        value: function initRenderer() {
-	            var parent = arguments.length <= 0 || arguments[0] === undefined ? 'container' : arguments[0];
-	            var width = arguments.length <= 1 || arguments[1] === undefined ? 640 : arguments[1];
-	            var height = arguments.length <= 2 || arguments[2] === undefined ? 480 : arguments[2];
+	            var parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'container';
+	            var width = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 640;
+	            var height = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 480;
 
 	            var renderer = PIXI.autoDetectRenderer(width, height, {
 	                antialiasing: true,
@@ -344,7 +344,7 @@
 	    }, {
 	        key: 'initTextures',
 	        value: function initTextures() {
-	            var images = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	            var images = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
 	            return new Promise(function (resolve, reject) {
 	                var loader = PIXI.loader,
@@ -468,7 +468,7 @@
 	                    var i = 0,
 	                        reelsStopped = 0,
 	                        stopThreadCallback = function stopThreadCallback() {
-	                        var callback = arguments.length <= 0 || arguments[0] === undefined ? stopThreadCallback : arguments[0];
+	                        var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : stopThreadCallback;
 
 	                        if (i > _this2.reels.length - 1) {
 	                            return;
@@ -558,8 +558,8 @@
 	    value: true
 	});
 	var config = {
-	    bgColor: 0x40e0d0,
-	    fillColor: 0xfcfcfc,
+	    bgColor: 0xcccccc,
+	    fillColor: 0xffffff,
 	    fillAlpha: .3,
 	    cornerRaduis: 20,
 	    left: 130,
@@ -834,7 +834,7 @@
 	    }, {
 	        key: 'setAnimation',
 	        value: function setAnimation() {
-	            var animationType = arguments.length <= 0 || arguments[0] === undefined ? "standard" : arguments[0];
+	            var animationType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "standard";
 
 	            if (_Animations2.default[animationType] !== undefined) {
 	                this.mainLoop = _Animations2.default[animationType].bind(this);
@@ -895,7 +895,7 @@
 	    }, {
 	        key: 'createElement',
 	        value: function createElement(num) {
-	            var type = arguments.length <= 1 || arguments[1] === undefined ? this.config.defaultTypeOfSymbol : arguments[1];
+	            var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.config.defaultTypeOfSymbol;
 
 	            if (this.config.symbols[num] === undefined) {
 	                console.error('There is no symbol=' + num + '. Using symbol = 1');
@@ -1116,8 +1116,8 @@
 	 * @returns {Promise}
 	 */
 	function parabolaAnimation(target) {
-	    var size = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	    var time = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	    var size = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	    var time = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
 	    return new Promise(function (resolve, reject) {
 	        new TimelineLite().to(target, time / 1000, { y: size }).to(target, time / 1000, { y: 0, onComplete: resolve });
